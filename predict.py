@@ -38,9 +38,11 @@ def generate_test_data(image_path):
     print np.shape(in_)
     return in_, w, h
 
+
 test_dir = '/home/ty/data/MSRA5000/image_noise'
 gt_dir = '/home/ty/data/MSRA5000/image_intensity'
 test_file_path = '/home/ty/data/MSRA5000/test_MSRA.txt'
+save_dir = '/home/ty/data/MSRA5000/image_denoise'
 
 file_names = read_test_file(test_file_path)
 input_shape = [512, 512, 1]
@@ -52,13 +54,26 @@ model = srcnn(input_shape=input_shape, kernel_size=[3, 3])
 # model.compile(loss=mean_squared_error, optimizer='adadelta')
 # model.summary()
 model.load_weights('checkpoint_weights_backup.h5')
-result = model.predict(x)
-print np.shape(result)
 
-plt.subplot(1, 3, 1)
-plt.imshow(result[0, :h, :w, 0])
-plt.subplot(1, 3, 2)
-plt.imshow(y[0, :h, :w, 0])
-plt.subplot(1, 3, 3)
-plt.imshow(x[0, :h, :w, 0])
-plt.show()
+
+for name in file_names:
+    x, w, h = generate_test_data(os.path.join(test_dir, name))
+    result = model.predict(x)
+    result = result * 255
+    result = result.astype('uint8')
+    img = Image.fromarray((result[0, :h, :w, 0]), mode='P')
+    if not os.path.exists(save_dir):
+        os.mkdir(save_dir)
+    img.save(os.path.join(save_dir, name))
+
+# x, w, h = generate_test_data(os.path.join(test_dir, file_names[0]))
+# result = model.predict(x)
+# print np.shape(result)
+
+# plt.subplot(1, 3, 1)
+# plt.imshow(result[0, :h, :w, 0])
+# plt.subplot(1, 3, 2)
+# plt.imshow(x[0, :h, :w, 0])
+# plt.subplot(1, 3, 3)
+# plt.imshow(x[0, :h, :w, 0])
+# plt.show()
