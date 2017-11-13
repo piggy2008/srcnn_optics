@@ -1,8 +1,8 @@
 from keras.callbacks import LearningRateScheduler, ModelCheckpoint
 from SRDataGenerator import SRDataGenerator
 import os
-from models import srcnn
-from losses import mean_squared_error
+from models import srcnn, cgi, unet, unet_limit, unet_limit_dialate, unet_limit_shortcut_dialate
+from losses import custom_loss, mean_squared_error, mean_absolute_error, cos_distance
 
 lr_base = 0.01
 lr_power = 0.9
@@ -41,10 +41,10 @@ nb_filters_conv1 = 64
 nb_filters_conv2 = 32
 kernel_size = (3, 3)
 classes = 1
-input_shape = [100, 100, 1]
-target_shape = [100, 100]
+input_shape = [128, 128, 1]
+target_shape = [128, 128]
 batch_size = 10
-epochs = 100
+epochs = 8
 
 train_file_path = '/home/ty/data/MSRA5000/train_MSRA.txt'
 data_dir = '/home/ty/data/MSRA5000/image_noise'
@@ -72,15 +72,17 @@ generator = train_datagen.flow_from_directory(file_path=train_file_path,
 scheduler = LearningRateScheduler(lr_scheduler)
 callbacks = [scheduler]
 
+
 # ################### checkpoint saver#######################
-checkpoint = ModelCheckpoint(filepath=os.path.join(save_path, 'checkpoint_weights_backup.h5'),
+checkpoint = ModelCheckpoint(filepath=os.path.join(save_path, 'checkpoint_weights.h5'),
                              save_weights_only=True)  # .{epoch:d}
 callbacks.append(checkpoint)
 
-model = srcnn(input_shape=input_shape, kernel_size=[3, 3])
-
+# model = srcnn(input_shape=input_shape, kernel_size=[3, 3])
+model = unet_limit_shortcut_dialate(input_shape=input_shape)
+# model.load_weights('unet_optics_l2.h5')
 model.compile(loss=mean_squared_error, optimizer='adadelta')
-
+model.summary()
 history = model.fit_generator(
         generator=generator,
         steps_per_epoch=5000,
@@ -88,4 +90,4 @@ history = model.fit_generator(
         callbacks=callbacks,
         nb_worker=4)
 
-model.save_weights('SRCNN_optics.h5')
+model.save_weights('unet_limit_shortcut_dialate_optics_l2.h5')
