@@ -82,6 +82,7 @@ def cgi(input_shape=None):
 
     x = Convolution2D(256, 1, 1, activation='relu', border_mode='same')(x)
     x = UpSampling2D(size=(2, 2))(x)
+
     x = merge([x, shortcut4], mode='sum')
     x = Convolution2D(256, 5, 5, border_mode='same', activation='relu')(x)
     x = Convolution2D(256, 5, 5, activation='relu', border_mode='same')(x)
