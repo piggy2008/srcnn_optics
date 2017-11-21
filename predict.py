@@ -1,5 +1,5 @@
 import os
-from models import srcnn, cgi, unet, unet_limit, unet_limit_dialate
+from models import srcnn, cgi, unet, unet_limit, unet_limit_dialate, AtrousFCN_Resnet50_16s
 # from train import mean_squared_error
 import numpy as np
 from PIL import Image
@@ -42,10 +42,10 @@ def generate_test_data(image_path):
     return in_, w, h
 
 
-test_dir = '/home/ty/data/MSRA5000/image_noise'
-gt_dir = '/home/ty/data/MSRA5000/image_intensity'
-test_file_path = '/home/ty/data/MSRA5000/test_MSRA.txt'
-save_dir = '/home/ty/data/MSRA5000/image_denoise'
+test_dir = '/home/public/noise_data/image_noise'
+gt_dir = '/home/public/noise_data/image_intensity'
+test_file_path = '/home/public/noise_data/test_MSRA.txt'
+save_dir = '/home/public/noise_data/image_denoise'
 
 file_names = read_test_file(test_file_path)
 input_shape = [512, 512, 1]
@@ -54,10 +54,10 @@ gt_path = os.path.join(gt_dir, file_names[0])
 # x, w, h = generate_test_data(image_path)
 # y, _, _ = generate_test_data(gt_path)
 # model = srcnn(input_shape=input_shape, kernel_size=[3, 3])
-model = unet_limit_dialate(input_shape=input_shape)
+model = AtrousFCN_Resnet50_16s(input_shape=input_shape, classes=1)
 # model.compile(loss=mean_squared_error, optimizer='adadelta')
 # model.summary()
-model.load_weights('unet_limit_dialate_optics_l2.h5')
+model.load_weights('AtrousFCN_Resnet50_16s_optics_l2.h5')
 
 total_psnr = 0.0
 total_ssim = 0.0

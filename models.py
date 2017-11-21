@@ -82,6 +82,7 @@ def cgi(input_shape=None):
 
     x = Convolution2D(256, 1, 1, activation='relu', border_mode='same')(x)
     x = UpSampling2D(size=(2, 2))(x)
+
     x = merge([x, shortcut4], mode='sum')
     x = Convolution2D(256, 5, 5, border_mode='same', activation='relu')(x)
     x = Convolution2D(256, 5, 5, activation='relu', border_mode='same')(x)
@@ -522,7 +523,7 @@ def FCN_Resnet50_32s(input_shape = None, weight_decay=0., batch_momentum=0.9, ba
     #classifying layer
     x = Convolution2D(classes, 1, 1, init='he_normal', activation='linear', border_mode='valid', subsample=(1, 1), W_regularizer=l2(weight_decay))(x)
 
-    x = BilinearUpSampling2D(size=(32, 32))(x)
+    x = BilinearUpSampling2D(target_size=tuple(image_size))(x)
 
     model = Model(img_input, x)
     weights_path = os.path.expanduser(os.path.join('~', '.keras/models/fcn_resnet50_weights_tf_dim_ordering_tf_kernels.h5'))
