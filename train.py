@@ -1,7 +1,9 @@
 from keras.callbacks import LearningRateScheduler, ModelCheckpoint
 from SRDataGenerator import SRDataGenerator
 import os
-from models import srcnn, cgi, unet, unet_limit, unet_limit_dialate, unet_limit_shortcut_dialate
+from models import srcnn, cgi, unet, unet_limit, unet_limit_dialate, \
+    unet_limit_shortcut_dialate, unet_limit_dialate_multiscale, \
+    unet_limit_shortcut_dialate3x3, FCN_Resnet50_32s, AtrousFCN_Resnet50_16s
 from losses import custom_loss, mean_squared_error, mean_absolute_error, cos_distance
 
 lr_base = 0.01
@@ -79,7 +81,7 @@ checkpoint = ModelCheckpoint(filepath=os.path.join(save_path, 'checkpoint_weight
 callbacks.append(checkpoint)
 
 # model = srcnn(input_shape=input_shape, kernel_size=[3, 3])
-model = unet_limit_shortcut_dialate(input_shape=input_shape)
+model = FCN_Resnet50_32s(input_shape=input_shape, classes=1)
 # model.load_weights('unet_optics_l2.h5')
 model.compile(loss=mean_squared_error, optimizer='adadelta')
 model.summary()
@@ -90,4 +92,4 @@ history = model.fit_generator(
         callbacks=callbacks,
         nb_worker=4)
 
-model.save_weights('unet_limit_shortcut_dialate_optics_l2.h5')
+model.save_weights('unet_limit_shortcut_dialate3x3_optics_l2.h5')

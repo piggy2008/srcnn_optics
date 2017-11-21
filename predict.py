@@ -1,5 +1,6 @@
 import os
-from models import srcnn, cgi, unet, unet_limit, unet_limit_dialate
+from models import srcnn, cgi, unet, unet_limit, unet_limit_dialate, \
+    unet_limit_shortcut_dialate, unet_limit_dialate_multiscale, unet_limit_shortcut_dialate3x3, AtrousFCN_Resnet50_16s, FCN_Resnet50_32s
 # from train import mean_squared_error
 import numpy as np
 from PIL import Image
@@ -54,10 +55,10 @@ gt_path = os.path.join(gt_dir, file_names[0])
 # x, w, h = generate_test_data(image_path)
 # y, _, _ = generate_test_data(gt_path)
 # model = srcnn(input_shape=input_shape, kernel_size=[3, 3])
-model = unet_limit_dialate(input_shape=input_shape)
+model = FCN_Resnet50_32s(input_shape=input_shape, classes=1)
 # model.compile(loss=mean_squared_error, optimizer='adadelta')
 # model.summary()
-model.load_weights('unet_limit_dialate_optics_l2.h5')
+model.load_weights('unet_limit_shortcut_dialate3x3_optics_l2.h5')
 
 total_psnr = 0.0
 total_ssim = 0.0
@@ -197,5 +198,11 @@ lr_power = 0.90
 l1: 0.2 l2: 0.8
 unet_limit_dialate model dialate=1 with 3*3 kernel
 psnr: 20.12  ssim: 0.61
+
+lr_base = 0.01
+lr_power = 0.90
+l1: 0 l2: 1
+unet_limit_shortcut_dialate model
+psnr: 20.04  ssim: 0.54
 
 '''
