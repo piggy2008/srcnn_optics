@@ -1,7 +1,8 @@
 from keras.callbacks import LearningRateScheduler, ModelCheckpoint
 from SRDataGenerator import SRDataGenerator
 import os
-from models import srcnn, cgi, unet, unet_limit, unet_limit_dialate, srcnn_fc, unet_limit_shortcut_dialate3x3, unet_limit_shortcut_dialate
+from models import srcnn, cgi, unet, unet_limit, unet_limit_dialate, \
+    srcnn_fc, unet_limit_shortcut_dialate3x3, unet_limit_shortcut_dialate, DnCNN
 from losses import custom_loss, mean_squared_error, mean_absolute_error, cos_distance
 from keras.preprocessing.image import *
 lr_base = 0.01
@@ -81,7 +82,7 @@ for i, image in enumerate(train_images):
     for j in range(len(imgs)):
         count2 += 1
         input_data[i * 4 + j] = imgs[j]
-        input_label[i * 4 + j] = labels[j]
+        input_label[i * 4 + j] = imgs[j] - labels[j]
 
 print count1
 print count2
@@ -111,7 +112,7 @@ checkpoint = ModelCheckpoint(filepath=os.path.join(save_path, 'checkpoint_weight
 callbacks.append(checkpoint)
 
 # model = srcnn(input_shape=input_shape, kernel_size=[3, 3])
-model = unet_limit_dialate(input_shape=input_shape)
+model = DnCNN(input_shape=input_shape)
 # model.load_weights('unet_optics_l2.h5')
 model.compile(loss=mean_squared_error, optimizer='adadelta')
 model.summary()
@@ -119,4 +120,4 @@ history = model.fit(input_data, input_label, batch_size=batch_size, nb_epoch=epo
                     callbacks=callbacks,
                     verbose=1)
 
-model.save_weights('unet_limit_dialate_l2_mnist_combinenoise200_64.h5')
+model.save_weights('DnCNN_l2_mnist_combinenoise200_noise.h5')

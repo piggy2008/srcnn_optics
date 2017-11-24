@@ -109,7 +109,7 @@ def cgi(input_shape=None):
     x = Convolution2D(32, 9, 9, activation='relu', border_mode='same')(x)
     x = Convolution2D(32, 9, 9, activation='relu', border_mode='same')(x)
 
-    x = Convolution2D(1, 1, 1, border_mode='same')(x)
+    x = Convolution2D(1, 1, 1, border_mode='same', activation='relu')(x)
     model = Model(img_input, x)
 
     # weights_path = os.path.expanduser(os.path.join('~', '.keras/models/fcn_vgg16_weights_tf_dim_ordering_tf_kernels.h5'))
@@ -231,7 +231,7 @@ def unet_limit(input_shape=None):
     x = Convolution2D(64, 9, 9, activation='relu', border_mode='same')(x)
     x = Convolution2D(64, 9, 9, activation='relu', border_mode='same')(x)
 
-    x = Convolution2D(1, 1, 1, border_mode='same')(x)
+    x = Convolution2D(1, 1, 1, border_mode='same', activation='relu')(x)
     model = Model(img_input, x)
 
     # weights_path = os.path.expanduser(os.path.join('~', '.keras/models/fcn_vgg16_weights_tf_dim_ordering_tf_kernels.h5'))
@@ -261,8 +261,11 @@ def unet_limit_dialate(input_shape=None):
     # x = MaxPooling2D(pool_size=(2, 2))(x)
 
     x = Convolution2D(256, 5, 5, border_mode='same', activation='relu', dilation_rate=1)(x)
+    x = Dropout(0.5)(x)
     x = Convolution2D(256, 5, 5, activation='relu', border_mode='same', dilation_rate=1)(x)
+    x = Dropout(0.5)(x)
     x = Convolution2D(256, 5, 5, activation='relu', border_mode='same', dilation_rate=1)(x)
+    x = Dropout(0.5)(x)
 
     x = Convolution2D(128, 1, 1, activation='relu', border_mode='same')(x)
     x = merge([x, shortcut3], mode='concat')
@@ -270,6 +273,7 @@ def unet_limit_dialate(input_shape=None):
     x = Convolution2D(256, 5, 5, border_mode='same', activation='relu')(x)
     x = Convolution2D(256, 5, 5, activation='relu', border_mode='same')(x)
     x = Convolution2D(256, 5, 5, activation='relu', border_mode='same')(x)
+
 
     x = Convolution2D(64, 1, 1, activation='relu', border_mode='same')(x)
     x = merge([x, shortcut2], mode='concat')
@@ -574,3 +578,75 @@ def AtrousFCN_Resnet50_16s(input_shape = None, weight_decay=0., batch_momentum=0
     model.load_weights(weights_path, by_name=True)
     return model
 
+
+
+def DnCNN(input_shape=None):
+    img_input = Input(shape=input_shape)
+
+    x = Convolution2D(64, 3, 3, border_mode='same', name='conv1', activation='relu')(img_input)
+
+    x = Convolution2D(64, 3, 3, border_mode='same', name='conv2')(x)
+    x = BatchNormalization(axis=3)(x)
+    x = Activation('relu')(x)
+
+    x = Convolution2D(64, 3, 3, border_mode='same', name='conv3')(x)
+    x = BatchNormalization(axis=3)(x)
+    x = Activation('relu')(x)
+
+    x = Convolution2D(64, 3, 3, border_mode='same', name='conv4')(x)
+    x = BatchNormalization(axis=3)(x)
+    x = Activation('relu')(x)
+
+    x = Convolution2D(64, 3, 3, border_mode='same', name='conv5')(x)
+    x = BatchNormalization(axis=3)(x)
+    x = Activation('relu')(x)
+
+    x = Convolution2D(64, 3, 3, border_mode='same', name='conv6')(x)
+    x = BatchNormalization(axis=3)(x)
+    x = Activation('relu')(x)
+
+    x = Convolution2D(64, 3, 3, border_mode='same', name='conv7')(x)
+    x = BatchNormalization(axis=3)(x)
+    x = Activation('relu')(x)
+
+    x = Convolution2D(64, 3, 3, border_mode='same', name='conv8')(x)
+    x = BatchNormalization(axis=3)(x)
+    x = Activation('relu')(x)
+
+    x = Convolution2D(64, 3, 3, border_mode='same', name='conv9')(x)
+    x = BatchNormalization(axis=3)(x)
+    x = Activation('relu')(x)
+
+    x = Convolution2D(64, 3, 3, border_mode='same', name='conv10')(x)
+    x = BatchNormalization(axis=3)(x)
+    x = Activation('relu')(x)
+
+    x = Convolution2D(64, 3, 3, border_mode='same', name='conv11')(x)
+    x = BatchNormalization(axis=3)(x)
+    x = Activation('relu')(x)
+
+    x = Convolution2D(64, 3, 3, border_mode='same', name='conv12')(x)
+    x = BatchNormalization(axis=3)(x)
+    x = Activation('relu')(x)
+
+    x = Convolution2D(64, 3, 3, border_mode='same', name='conv13')(x)
+    x = BatchNormalization(axis=3)(x)
+    x = Activation('relu')(x)
+
+    x = Convolution2D(64, 3, 3, border_mode='same', name='conv14')(x)
+    x = BatchNormalization(axis=3)(x)
+    x = Activation('relu')(x)
+
+    x = Convolution2D(64, 3, 3, border_mode='same', name='conv15')(x)
+    x = BatchNormalization(axis=3)(x)
+    x = Activation('relu')(x)
+
+    x = Convolution2D(64, 3, 3, border_mode='same', name='conv16')(x)
+    x = BatchNormalization(axis=3)(x)
+    x = Activation('relu')(x)
+
+    x = Convolution2D(1, 3, 3, border_mode='same', name='conv17')(x)
+
+
+    model = Model(img_input, x)
+    return model

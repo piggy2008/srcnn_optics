@@ -47,8 +47,8 @@ batch_size = 100
 epochs = 8
 
 
-data_dir = '/home/public/mnist_data/mnist_data_56/noise_200/train'
-label_dir = '/home/public/mnist_data/mnist_data_56/combine_image/train'
+data_dir = '/home/ty/data/mnist_data/mnist_data_56/noise_200/train'
+label_dir = '/home/ty/data/mnist_data/mnist_data_56/combine_image/train'
 data_suffix = '.jpg.bmp'
 label_suffix = '.jpg.bmp'
 save_path = '/home/ty/code/srcnn_optics'
@@ -73,7 +73,7 @@ for i in range(epochs):
 
     model.save_weights(os.path.join(save_path, 'checkpoint_weights.h5'))
 
-model.save_weights('unet_limit_shortcut_dialate3x3_optics_l2.h5')
+model.save_weights('unet_limit_shortcut_dialate3x3_optics_l2_noise200.h5')
 
 
 
