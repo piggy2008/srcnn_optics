@@ -2,6 +2,7 @@ from keras.preprocessing.image import *
 from PIL import Image
 from scipy.misc import imresize
 import numpy as np
+import matlab.engine
 
 def crop_mnist_image(image56, input_shape):
     imgs = []
@@ -32,3 +33,20 @@ def combine_mnist_image(results, shape=[28, 28]):
     combine_image[shape[0]:, shape[1]:] = results[3]
 
     return combine_image
+
+def matlab_corre(img1, img2):
+    eng = matlab.engine.start_matlab()
+    pvalue, corre = eng.optcorre(img1, img2)
+    print pvalue, corre
+
+if __name__ == '__main__':
+    train_file_path = '/home/public/mnist_data/mnist_data_64/noise_100/test'
+    all_images = os.listdir(train_file_path)
+    all_images.sort()
+    test_images = all_images
+    img = load_img(os.path.join(train_file_path, test_images[0]), grayscale=True)
+    x = img_to_array(img, data_format='channels_last')
+
+    img2 = load_img(os.path.join(train_file_path, test_images[1]), grayscale=True)
+    x2 = img_to_array(img2, data_format='channels_last')
+    matlab_corre(x, x2)
