@@ -10,6 +10,18 @@ import os
 from resnet_helpers import *
 from BilinearUpSampling import *
 
+def mlp():
+    img_input = Input(shape=(4096,))
+    x = Dense(4096)(img_input)
+    x = Activation('relu')(x)
+    x = Dense(500)(x)
+    x = Activation('relu')(x)
+    x = Dense(4096)(x)
+    x = Activation('relu')(x)
+    model = Model(img_input, x)
+
+    return model
+
 def srcnn(input_shape=None, kernel_size=[3, 3]):
 
     img_input = Input(shape=input_shape)
@@ -17,9 +29,9 @@ def srcnn(input_shape=None, kernel_size=[3, 3]):
     x = Convolution2D(64, kernel_size[0], kernel_size[1], border_mode='same', name='block1_conv1')(img_input)
     # x = BatchNormalization(axis=3, name='bn_conv1')(x)
     x = Activation('relu')(x)
-    x = Convolution2D(32, kernel_size[0], kernel_size[1], activation='relu', border_mode='same', name='block1_conv2')(x)
+    x = Convolution2D(32, kernel_size[0], kernel_size[1], activation='sigmoid', border_mode='same', name='block1_conv2')(x)
     # x = BatchNormalization(axis=3, name='bn_conv2')(x)
-    x = Convolution2D(1, 1, 1, border_mode='same')(x)
+    x = Convolution2D(1, 3, 3, border_mode='same')(x)
     x = Activation('relu')(x)
     model = Model(img_input, x)
 
@@ -207,8 +219,11 @@ def unet_limit(input_shape=None):
     x = MaxPooling2D(pool_size=(2, 2))(x)
 
     x = Convolution2D(256, 5, 5, border_mode='same', activation='relu')(x)
+    x = Dropout(0.5)(x)
     x = Convolution2D(256, 5, 5, activation='relu', border_mode='same')(x)
+    x = Dropout(0.5)(x)
     x = Convolution2D(256, 5, 5, activation='relu', border_mode='same')(x)
+    x = Dropout(0.5)(x)
 
     x = Convolution2D(128, 1, 1, activation='relu', border_mode='same')(x)
     x = merge([x, shortcut3], mode='concat')
