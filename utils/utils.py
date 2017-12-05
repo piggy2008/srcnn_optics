@@ -36,6 +36,8 @@ def combine_mnist_image(results, shape=[28, 28]):
 
 def matlab_corre(img1, img2):
     eng = matlab.engine.start_matlab()
+    img1 = matlab.double(img1)
+    img2 = matlab.double(img2)
     pvalue, corre = eng.optcorre(img1, img2)
     print pvalue, corre
 
