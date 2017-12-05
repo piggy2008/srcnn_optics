@@ -47,44 +47,39 @@ classes = 1
 input_shape = (64, 64, 1)
 target_shape = [64, 64]
 batch_size = 32
-epochs = 20
+epochs = 40
 
 save_path = '/home/ty/code/srcnn_optics'
-train_file_path = '/home/ty/data/mnist_data/mnist_data_56/noise_200/train'
-train_label_path = '/home/ty/data/mnist_data/mnist_data_56/combine_image/train'
+train_file_path = '/home/ty/data/mnist_data/mnist_data_64/noise_100/train'
+train_label_path = '/home/ty/data/mnist_data/mnist_data_64/image/train'
 # data_dir = '/home/ty/data/MSRA5000/image_noise'
 # label_dir = '/home/ty/data/MSRA5000/image_intensity'
 
 all_images = os.listdir(train_label_path)
 all_images.sort()
 train_images = all_images
-input_data = np.zeros((len(train_images) * 4,) + input_shape)
-input_label = np.zeros((len(train_images) * 4,) + input_shape)
+input_data = np.zeros((len(train_images),) + input_shape)
+input_label = np.zeros((len(train_images),) + input_shape)
 # train_data = [load_img(os.path.join(train_file_path, x + '.bmp')) for x in images]
 # train_label = [load_img(os.path.join(train_label_path, x)) for x in images]
-count1 = 0
-count2 = 0
+
 for i, image in enumerate(train_images):
     img = load_img(os.path.join(train_file_path, image), grayscale=True)
     # img = img.resize((input_shape[1], input_shape[0]), Image.BILINEAR)
-    imgs = crop_mnist_image(img, input_shape)
-    count1 += 1
-    # data = img_to_array(img, data_format='channels_last')
-    # input_data[i] = data.astype(dtype=float) / 255
+    # imgs = crop_mnist_image(img, input_shape)
+    data = img_to_array(img, data_format='channels_last')
+    input_data[i] = data.astype(dtype=float) / 255
 
     label = load_img(os.path.join(train_label_path, image), grayscale=True)
     # label = label.resize((input_shape[1], input_shape[0]), Image.BILINEAR)
-    labels = crop_mnist_image(label, input_shape)
-    # label_arr = img_to_array(label, data_format='channels_last')
-    # input_label[i] = label_arr.astype(dtype=float) / 255
+    # labels = crop_mnist_image(label, input_shape)
+    label_arr = img_to_array(label, data_format='channels_last')
+    input_label[i] = label_arr.astype(dtype=float) / 255
 
-    for j in range(len(imgs)):
-        count2 += 1
-        input_data[i * 4 + j] = imgs[j]
-        input_label[i * 4 + j] = labels[j]
-
-print count1
-print count2
+    # for j in range(len(imgs)):
+    #     count2 += 1
+    #     input_data[i * 4 + j] = imgs[j]
+    #     input_label[i * 4 + j] = labels[j]
 
 # train_datagen = SRDataGenerator(crop_mode='random',
 #                                 crop_size=target_shape,
@@ -119,4 +114,4 @@ history = model.fit(input_data, input_label, batch_size=batch_size, nb_epoch=epo
                     callbacks=callbacks,
                     verbose=1)
 
-model.save_weights('unet_limit_dialate_l2_mnist_combinenoise200_64.h5')
+model.save_weights('unet_limit_dialate_l2_mnist_noise100_64.h5')
