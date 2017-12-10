@@ -26,11 +26,13 @@ def srcnn(input_shape=None, kernel_size=[3, 3]):
 
     img_input = Input(shape=input_shape)
 
-    x = Convolution2D(64, kernel_size[0], kernel_size[1], border_mode='same', name='block1_conv1')(img_input)
-    # x = BatchNormalization(axis=3, name='bn_conv1')(x)
+    x = Convolution2D(64, kernel_size[0], kernel_size[1],
+                      border_mode='same', name='block1_conv1')(img_input)
+
     x = Activation('relu')(x)
-    x = Convolution2D(32, kernel_size[0], kernel_size[1], activation='sigmoid', border_mode='same', name='block1_conv2')(x)
-    # x = BatchNormalization(axis=3, name='bn_conv2')(x)
+    x = Convolution2D(32, kernel_size[0], kernel_size[1],
+                      activation='sigmoid', border_mode='same', name='block1_conv2')(x)
+
     x = Convolution2D(1, 3, 3, border_mode='same')(x)
     x = Activation('relu')(x)
     model = Model(img_input, x)
@@ -276,11 +278,11 @@ def unet_limit_dialate(input_shape=None):
     # x = MaxPooling2D(pool_size=(2, 2))(x)
 
     x = Convolution2D(256, 5, 5, border_mode='same', activation='relu', dilation_rate=1)(x)
-    x = Dropout(0.5)(x)
+    x = Dropout(0.75)(x)
     x = Convolution2D(256, 5, 5, activation='relu', border_mode='same', dilation_rate=1)(x)
-    x = Dropout(0.5)(x)
+    x = Dropout(0.75)(x)
     x = Convolution2D(256, 5, 5, activation='relu', border_mode='same', dilation_rate=1)(x)
-    x = Dropout(0.5)(x)
+    x = Dropout(0.75)(x)
 
     x = Convolution2D(128, 1, 1, activation='relu', border_mode='same')(x)
     x = merge([x, shortcut3], mode='concat')

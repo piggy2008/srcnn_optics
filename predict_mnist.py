@@ -1,7 +1,9 @@
 import os
-from models import srcnn, cgi, unet, unet_limit, unet_limit_dialate, srcnn_fc, DnCNN, mlp
+
+
 # from train import mean_squared_error
 import numpy as np
+from models import *
 from PIL import Image
 from matplotlib import pyplot as plt
 from skimage.measure import compare_psnr, compare_ssim
@@ -31,30 +33,47 @@ nb_filters_conv1 = 64
 nb_filters_conv2 = 32
 kernel_size = (3, 3)
 classes = 1
-input_shape = (64, 64, 1)
-input_shape2 = (48, 48, 1)
-input_shape3 = (28, 28, 1)
+
+input_shape = (48, 48, 1)
+input_shape2 = (36, 36, 1)
+input_shape3 = (64, 64, 1)
+target_shape = [128, 128]
+
+
+
 
 batch_size = 128
 epochs = 50
 
 save_path = '/home/ty/code/srcnn_optics'
-train_file_path = '/home/public/mnist_data/mnist_data_64/noise_100/test'
-# train_file_path = '/home/ty/data/mnist_data/mnist_denoise'
-train_label_path = '/home/public/mnist_data/mnist_data_64/combine_image/test'
-save_dir = '/home/ty/data/mnist_data/mnist_denoise_mlp'
+
+train_file_path = '/home/ty/data/mnist_data/mnist_data_64/noise_50/test'
+train_label_path = '/home/ty/data/mnist_data/test_new/image_56'
+save_dir = '/home/ty/data/mnist_data/mnist_denoise_dialate'
+
 
 all_images = os.listdir(train_file_path)
 all_images.sort()
 test_images = all_images
+
+model = unet_limit_dialate(input_shape=input_shape3)
+# model2 = unet_limit_dialate(input_shape=input_shape2)
+# model3 = unet_limit_dialate(input_shape=input_shape3)
+# model = srcnn(input_shape=input_shape, kernel_size=[3, 3])
+
+model.load_weights('unet_limit_dialate_l2_mnist_noise50_64.h5')
+# model2.load_weights('unet_limit_dialate_l2_mnist_combinenoise200_48.h5')
+# model3.load_weights('unet_limit_dialate_l2_mnist_combinenoise200_64.h5')
+
 # model = unet_limit(input_shape=input_shape)
 # model2 = DnCNN(input_shape=input_shape2)
 # model3 = DnCNN(input_shape=input_shape3)
 # model = srcnn(input_shape=input_shape, kernel_size=[3, 3])
-model = mlp()
-model.load_weights('mlp_noise100_64.h5')
+# model = mlp()
+# model.load_weights('mlp_noise100_64.h5')
 # model2.load_weights('unet_limit_dialate_l2_mnist_combinenoise300_32.h5')
 # model3.load_weights('unet_limit_dialate_l2_mnist_combinenoise300_32.h5')
+
 
 
 total_psnr = 0.0
@@ -70,7 +89,9 @@ for image in test_images:
     x = img_to_array(img, data_format='channels_last')
     x /= 255
     x = x[np.newaxis, ...]
+
     x = x.reshape(1, 4096)
+
     result = model.predict(x)
 
     # y = load_img(os.path.join(train_label_path, image), grayscale=True)
@@ -80,11 +101,19 @@ for image in test_images:
     # results = []
     # for crop_image in imgs:
     #     result = predict_multiscale_noise(input_shape, model, crop_image)
+
+    # result2 = predict_multiscale(input_shape2, model2, crop_image)
+    # result3 = predict_multiscale(input_shape3, model3, crop_image)
+    # result = (result + result + result3) / 3
+
+    # results.append(result)
+
         # result2 = predict_multiscale(input_shape2, model2, crop_image)
         # result3 = predict_multiscale(input_shape3, model3, crop_image)
         # result = (result + result + result3) / 3
 
         # results.append(result)
+
     # combine_image = combine_mnist_image(results)
     # plt.subplot(2, 2, 1)
     # plt.imshow(results[0])
@@ -104,8 +133,10 @@ for image in test_images:
 
     # combine_image = combine_image * 255
     # combine_image = combine_image.astype('uint8')
+
     result = result.reshape(1, 64, 64)
     result = result[0, :, :] * 255
+
     result = result.astype('uint8')
     img = Image.fromarray(result, mode='P')
     # img = img.resize((56, 56), Image.BILINEAR)

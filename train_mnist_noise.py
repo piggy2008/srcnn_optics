@@ -63,13 +63,10 @@ input_data = np.zeros((len(train_images) * 4,) + input_shape)
 input_label = np.zeros((len(train_images) * 4,) + input_shape)
 # train_data = [load_img(os.path.join(train_file_path, x + '.bmp')) for x in images]
 # train_label = [load_img(os.path.join(train_label_path, x)) for x in images]
-count1 = 0
-count2 = 0
 for i, image in enumerate(train_images):
     img = load_img(os.path.join(train_file_path, image), grayscale=True)
     # img = img.resize((input_shape[1], input_shape[0]), Image.BILINEAR)
     imgs = crop_mnist_image(img, input_shape)
-    count1 += 1
     # data = img_to_array(img, data_format='channels_last')
     # input_data[i] = data.astype(dtype=float) / 255
 
@@ -80,12 +77,9 @@ for i, image in enumerate(train_images):
     # input_label[i] = label_arr.astype(dtype=float) / 255
 
     for j in range(len(imgs)):
-        count2 += 1
         input_data[i * 4 + j] = imgs[j]
-        input_label[i * 4 + j] = imgs[j] - labels[j]
+        input_label[i * 4 + j] = labels[j]
 
-print count1
-print count2
 
 # train_datagen = SRDataGenerator(crop_mode='random',
 #                                 crop_size=target_shape,
