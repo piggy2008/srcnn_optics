@@ -8,7 +8,8 @@ lr_base = 0.01
 lr_power = 0.9
 from PIL import Image
 from matplotlib import pyplot as plt
-from utils import crop_mnist_image
+from utils.utils import crop_mnist_image
+import scipy.io as sio
 
 # ###############learning rate scheduler####################
 def lr_scheduler(epoch, mode='power_decay'):
@@ -54,32 +55,67 @@ train_file_path = '/home/public/mnist_data/mnist_data_64/noise_50/train'
 train_label_path = '/home/public/mnist_data/mnist_data_64/image/train'
 # data_dir = '/home/ty/data/MSRA5000/image_noise'
 # label_dir = '/home/ty/data/MSRA5000/image_intensity'
+mat_train_path = '/home/public/noise_64/mnist_noise_64_train.mat'
+mat_test_path = '/home/public/noise_64/mnist_noise_64_test.mat'
 
-all_images = os.listdir(train_label_path)
-all_images.sort()
-train_images = all_images
-input_data = np.zeros((len(train_images),) + input_shape)
-input_label = np.zeros((len(train_images),) + input_shape)
-# train_data = [load_img(os.path.join(train_file_path, x + '.bmp')) for x in images]
-# train_label = [load_img(os.path.join(train_label_path, x)) for x in images]
+def generate_data_from_dir(train_file_path, train_label_path):
+    all_images = os.listdir(train_label_path)
+    all_images.sort()
+    train_images = all_images
+    input_data = np.zeros((len(train_images),) + input_shape)
+    input_label = np.zeros((len(train_images),) + input_shape)
+    # train_data = [load_img(os.path.join(train_file_path, x + '.bmp')) for x in images]
+    # train_label = [load_img(os.path.join(train_label_path, x)) for x in images]
 
-for i, image in enumerate(train_images):
-    img = load_img(os.path.join(train_file_path, image), grayscale=True)
-    # img = img.resize((input_shape[1], input_shape[0]), Image.BILINEAR)
-    # imgs = crop_mnist_image(img, input_shape)
+    for i, image in enumerate(train_images):
+        img = load_img(os.path.join(train_file_path, image), grayscale=True)
+        # img = img.resize((input_shape[1], input_shape[0]), Image.BILINEAR)
+        # imgs = crop_mnist_image(img, input_shape)
 
-    data = img_to_array(img, data_format='channels_last')
-    input_data[i] = data.astype(dtype=float) / 255
+        data = img_to_array(img, data_format='channels_last')
+        input_data[i] = data.astype(dtype=float) / 255
 
-    label = load_img(os.path.join(train_label_path, image), grayscale=True)
-    # label = label.resize((input_shape[1], input_shape[0]), Image.BILINEAR)
-    # labels = crop_mnist_image(label, input_shape)
-    label_arr = img_to_array(label, data_format='channels_last')
-    input_label[i] = label_arr.astype(dtype=float) / 255
+        label = load_img(os.path.join(train_label_path, image), grayscale=True)
+        # label = label.resize((input_shape[1], input_shape[0]), Image.BILINEAR)
+        # labels = crop_mnist_image(label, input_shape)
+        label_arr = img_to_array(label, data_format='channels_last')
+        input_label[i] = label_arr.astype(dtype=float) / 255
 
-    # for j in range(len(imgs)):
-    #     input_data[i * 4 + j] = imgs[j]
-    #     input_label[i * 4 + j] = labels[j]
+        # for j in range(len(imgs)):
+        #     input_data[i * 4 + j] = imgs[j]
+        #     input_label[i * 4 + j] = labels[j]
+    return input_data, input_label
+
+
+def generate_data_from_mat(mat_train_path, mat_test_path):
+    input = sio.loadmat(mat_test_path)
+
+
+    input_data = np.zeros((len(train_images),) + input_shape)
+    input_label = np.zeros((len(train_images),) + input_shape)
+    # train_data = [load_img(os.path.join(train_file_path, x + '.bmp')) for x in images]
+    # train_label = [load_img(os.path.join(train_label_path, x)) for x in images]
+
+    for i, image in enumerate(train_images):
+        img = load_img(os.path.join(train_file_path, image), grayscale=True)
+        # img = img.resize((input_shape[1], input_shape[0]), Image.BILINEAR)
+        # imgs = crop_mnist_image(img, input_shape)
+
+        data = img_to_array(img, data_format='channels_last')
+        input_data[i] = data.astype(dtype=float) / 255
+
+        label = load_img(os.path.join(train_label_path, image), grayscale=True)
+        # label = label.resize((input_shape[1], input_shape[0]), Image.BILINEAR)
+        # labels = crop_mnist_image(label, input_shape)
+        label_arr = img_to_array(label, data_format='channels_last')
+        input_label[i] = label_arr.astype(dtype=float) / 255
+
+        # for j in range(len(imgs)):
+        #     input_data[i * 4 + j] = imgs[j]
+        #     input_label[i * 4 + j] = labels[j]
+    return input_data, input_label
+
+input_data, input_label = generate_data_from_dir(train_file_path, train_label_path)
 
 # train_datagen = SRDataGenerator(crop_mode='random',
 #                                 crop_size=target_shape,
