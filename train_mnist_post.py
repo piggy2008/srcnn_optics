@@ -1,8 +1,7 @@
 from keras.callbacks import LearningRateScheduler, ModelCheckpoint
 from SRDataGenerator import SRDataGenerator
 import os
-from models import srcnn, cgi, unet, unet_limit, unet_limit_dialate, \
-    srcnn_fc, unet_limit_shortcut_dialate3x3, unet_limit_shortcut_dialate, DnCNN
+from models import srcnn, cgi, unet, unet_limit, unet_limit_dialate, srcnn_fc, unet_limit_shortcut_dialate3x3, unet_limit_shortcut_dialate, DnCNN
 from losses import custom_loss, mean_squared_error, mean_absolute_error, cos_distance
 from keras.preprocessing.image import *
 lr_base = 0.01
@@ -51,35 +50,36 @@ batch_size = 32
 epochs = 20
 
 save_path = '/home/ty/code/srcnn_optics'
-train_file_path = '/home/public/mnist_data/mnist_data_56/noise_200/train'
-train_label_path = '/home/public/mnist_data/mnist_data_56/combine_image/train'
+train_file_path = '/home/ty/data/mnist_data/mnist_denoise_post'
+train_label_path = '/home/public/mnist_data/mnist_data_64/image/train'
 # data_dir = '/home/ty/data/MSRA5000/image_noise'
 # label_dir = '/home/ty/data/MSRA5000/image_intensity'
 
 all_images = os.listdir(train_label_path)
 all_images.sort()
 train_images = all_images
-input_data = np.zeros((len(train_images) * 4,) + input_shape)
-input_label = np.zeros((len(train_images) * 4,) + input_shape)
+input_data = np.zeros((len(train_images),) + input_shape)
+input_label = np.zeros((len(train_images),) + input_shape)
 # train_data = [load_img(os.path.join(train_file_path, x + '.bmp')) for x in images]
 # train_label = [load_img(os.path.join(train_label_path, x)) for x in images]
+
 for i, image in enumerate(train_images):
     img = load_img(os.path.join(train_file_path, image), grayscale=True)
     # img = img.resize((input_shape[1], input_shape[0]), Image.BILINEAR)
-    imgs = crop_mnist_image(img, input_shape)
-    # data = img_to_array(img, data_format='channels_last')
-    # input_data[i] = data.astype(dtype=float) / 255
+    # imgs = crop_mnist_image(img, input_shape)
+
+    data = img_to_array(img, data_format='channels_last')
+    input_data[i] = data.astype(dtype=float) / 255
 
     label = load_img(os.path.join(train_label_path, image), grayscale=True)
     # label = label.resize((input_shape[1], input_shape[0]), Image.BILINEAR)
-    labels = crop_mnist_image(label, input_shape)
-    # label_arr = img_to_array(label, data_format='channels_last')
-    # input_label[i] = label_arr.astype(dtype=float) / 255
+    # labels = crop_mnist_image(label, input_shape)
+    label_arr = img_to_array(label, data_format='channels_last')
+    input_label[i] = label_arr.astype(dtype=float) / 255
 
-    for j in range(len(imgs)):
-        input_data[i * 4 + j] = imgs[j]
-        input_label[i * 4 + j] = labels[j]
-
+    # for j in range(len(imgs)):
+    #     input_data[i * 4 + j] = imgs[j]
+    #     input_label[i * 4 + j] = labels[j]
 
 # train_datagen = SRDataGenerator(crop_mode='random',
 #                                 crop_size=target_shape,
@@ -105,13 +105,13 @@ checkpoint = ModelCheckpoint(filepath=os.path.join(save_path, 'checkpoint_weight
                              save_weights_only=True)  # .{epoch:d}
 callbacks.append(checkpoint)
 
-# model = srcnn(input_shape=input_shape, kernel_size=[3, 3])
-model = DnCNN(input_shape=input_shape)
+model = srcnn(input_shape=input_shape, kernel_size=[3, 3])
+# model = unet_limit(input_shape=input_shape)
 # model.load_weights('unet_optics_l2.h5')
-model.compile(loss=mean_squared_error, optimizer='adadelta')
+model.compile(loss=mean_absolute_error, optimizer='adadelta')
 model.summary()
 history = model.fit(input_data, input_label, batch_size=batch_size, nb_epoch=epochs,
                     callbacks=callbacks,
                     verbose=1)
 
-model.save_weights('DnCNN_l2_mnist_combinenoise200_noise.h5')
+model.save_weights('srcnn_post_noise100_64.h5')

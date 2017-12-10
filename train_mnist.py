@@ -1,14 +1,14 @@
 from keras.callbacks import LearningRateScheduler, ModelCheckpoint
 from SRDataGenerator import SRDataGenerator
 import os
-from models import srcnn, cgi, unet, unet_limit, unet_limit_dialate, srcnn_fc, unet_limit_shortcut_dialate3x3, unet_limit_shortcut_dialate
+from models import srcnn, cgi, unet, unet_limit, unet_limit_dialate, srcnn_fc, unet_limit_shortcut_dialate3x3, unet_limit_shortcut_dialate, DnCNN
 from losses import custom_loss, mean_squared_error, mean_absolute_error, cos_distance
 from keras.preprocessing.image import *
 lr_base = 0.01
 lr_power = 0.9
 from PIL import Image
 from matplotlib import pyplot as plt
-from utils import crop_mnist_image
+from utils.utils import crop_mnist_image
 
 # ###############learning rate scheduler####################
 def lr_scheduler(epoch, mode='power_decay'):
@@ -50,8 +50,10 @@ batch_size = 32
 epochs = 40
 
 save_path = '/home/ty/code/srcnn_optics'
+
 train_file_path = '/home/ty/data/mnist_data/mnist_data_64/noise_100/train'
 train_label_path = '/home/ty/data/mnist_data/mnist_data_64/image/train'
+
 # data_dir = '/home/ty/data/MSRA5000/image_noise'
 # label_dir = '/home/ty/data/MSRA5000/image_intensity'
 
@@ -67,6 +69,7 @@ for i, image in enumerate(train_images):
     img = load_img(os.path.join(train_file_path, image), grayscale=True)
     # img = img.resize((input_shape[1], input_shape[0]), Image.BILINEAR)
     # imgs = crop_mnist_image(img, input_shape)
+
     data = img_to_array(img, data_format='channels_last')
     input_data[i] = data.astype(dtype=float) / 255
 
@@ -77,7 +80,7 @@ for i, image in enumerate(train_images):
     input_label[i] = label_arr.astype(dtype=float) / 255
 
     # for j in range(len(imgs)):
-    #     count2 += 1
+
     #     input_data[i * 4 + j] = imgs[j]
     #     input_label[i * 4 + j] = labels[j]
 
@@ -106,12 +109,13 @@ checkpoint = ModelCheckpoint(filepath=os.path.join(save_path, 'checkpoint_weight
 callbacks.append(checkpoint)
 
 # model = srcnn(input_shape=input_shape, kernel_size=[3, 3])
-model = unet_limit_dialate(input_shape=input_shape)
+model = unet_limit(input_shape=input_shape)
 # model.load_weights('unet_optics_l2.h5')
 model.compile(loss=mean_squared_error, optimizer='adadelta')
 model.summary()
 history = model.fit(input_data, input_label, batch_size=batch_size, nb_epoch=epochs,
                     callbacks=callbacks,
                     verbose=1)
+
 
 model.save_weights('unet_limit_dialate_l2_mnist_noise100_64.h5')
